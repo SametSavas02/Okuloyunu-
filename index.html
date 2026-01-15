@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Okul Oyunu - Tek Dosya Sistem</title>
+    <style>
+        /* --- CSS KODLARI BURADA --- */
+        body { background: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
+        .container { width: 100%; max-width: 500px; padding: 10px; box-sizing: border-box; }
+        .card { background: #1e293b; border-radius: 20px; padding: 20px; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .text-blue { color: #3b82f6; text-align: center; margin-top: 0; }
+        
+        button { border-radius: 12px; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
+        .btn-blue { background: #3b82f6; color: white; width: 100%; padding: 12px; margin-top: 10px; }
+        .btn-green { background: #10b981; color: white; width: 100%; padding: 12px; margin-top: 10px; }
+        .btn-red { background: #ef4444; color: white; width: 100%; padding: 10px; margin-top: 20px; width: 100%; }
+        
+        input, select { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: none; background: #0f172a; color: white; box-sizing: border-box; border: 1px solid #334155; }
+
+        .nav-menu { display: flex; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+        .nav-menu button { flex: 1; min-width: 80px; padding: 10px 2px; background: #334155; color: white; font-size: 11px; }
+        .info-header { background: #3b82f6; padding: 12px; border-radius: 12px; text-align: center; font-weight: bold; margin-bottom: 15px; border-bottom: 4px solid #2563eb; }
+
+        /* --- KARAKTER GÖRÜNÜMÜ --- */
+        .avatar-box { width: 200px; height: 280px; background: #020617; margin: 0 auto; border-radius: 20px; position: relative; border: 2px solid #3b82f6; overflow: hidden; }
+        .layer { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .body-skin { background: #ffdbac; width: 60px; height: 60px; border-radius: 50%; left: 70px; top: 40px; position: absolute; box-shadow: 0 65px 0 5px #ffdbac; z-index: 5; }
+        
+        .face-detail { position: absolute; width: 100%; height: 100%; z-index: 15; }
+        .eye { position: absolute; width: 6px; height: 6px; background: #333; border-radius: 50%; top: 65px; }
+        .eye.left { left: 85px; }
+        .eye.right { left: 108px; }
+        .mouth { position: absolute; width: 12px; height: 6px; border: 2px solid #333; border-top: 0; left: 93px; top: 80px; border-radius: 0 0 10px 10px; }
+        
+        .arm { position: absolute; width: 15px; height: 65px; background: #ffdbac; top: 110px; border-radius: 10px; z-index: 4; transition: 0.3s; }
+        .arm.left { left: 40px; transform: rotate(10deg); }
+        .arm.right { right: 40px; transform: rotate(-10deg); }
+        .hand { position: absolute; width: 18px; height: 18px; background: #ffdbac; bottom: -5px; border-radius: 50%; left: -1.5px; }
+        .gizli-kol { opacity: 0 !important; }
+
+        /* --- KIYAFET KATMANLARI --- */
+        .c-shirt { width: 100px; height: 80px; left: 50px; top: 105px; position: absolute; border-radius: 10px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+        .c-pant { width: 85px; height: 70px; left: 57.5px; top: 180px; position: absolute; border-radius: 5px; }
+        .c-shoe { width: 32px; height: 16px; position: absolute; top: 245px; border-radius: 4px; z-index: 12; }
+
+        /* Kırmızı 3D Tişört Ayarı */
+        .kirmizi-tisort-resim {
+            background-image: url('kirmizi-tisort.png'); 
+            background-color: transparent !important;
+            width: 140px !important;
+            height: 110px !important;
+            left: 30px !important;
+            top: 85px !important;
+            z-index: 20;
+        }
+
+        .list-item { background: #0f172a; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .item-card { background: #0f172a; padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #334155; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="auth-section" class="card">
+        <h2 class="text-blue">Okul Oyunu Giriş</h2>
+        <div class="nav-menu">
+            <button onclick="tabDegistir('login')">Giriş Yap</button>
+            <button onclick="tabDegistir('register')">Kayıt Ol</button>
+        </div>
+        
+        <div id="login-form">
+            <input type="email" id="l-email" placeholder="E-posta">
+            <input type="password" id="l-pass" placeholder="Şifre">
+            <button onclick="girisYap()" class="btn-blue">Sisteme Giriş</button>
+        </div>
+
+        <div id="register-form" style="display:none;">
+            <input type="text" id="r-ad" placeholder="Ad Soyad">
+            <input type="text" id="r-sinif" placeholder="Sınıf (Örn: 9-A)">
+            <input type="email" id="r-email" placeholder="E-posta">
+            <input type="password" id="r-pass" placeholder="Şifre Oluştur">
+            <button onclick="ogrenciKaydet()" class="btn-green">Hesap Oluştur</button>
+        </div>
+    </div>
+
+    <div id="main-app" style="display:none;">
+        <div class="nav-menu" id="dynamic-nav">
+            <button onclick="panelAc('dashboard')">👤 Profil</button>
+            <button onclick="panelAc('market')">🛒 Market</button>
+            <button onclick="panelAc('inventory')">📦 Çanta</button>
+            <button onclick="panelAc('leaderboard')">🏆 Liste</button>
+        </div>
+
+        <div id="dashboard" class="panel card">
+            <div id="status-bar" class="info-header">Yükleniyor...</div>
+            <div class="avatar-box">
+                <div class="face-detail"><div class="eye left"></div><div class="eye right"></div><div class="mouth"></div></div>
+                <div class="arm left"><div class="hand"></div></div>
+                <div class="arm right"><div class="hand"></div></div>
+                <div class="layer body-skin"></div>
+                <div id="view-shoe-l" class="c-shoe" style="left:65px;"></div>
+                <div id="view-shoe-r" class="c-shoe" style="left:103px;"></div>
+                <div id="view-pant" class="layer"></div>
+                <div id="view-shirt" class="layer"></div>
+                <div id="view-hat" class="layer"></div>
+            </div>
+            <button onclick="auth.signOut()" class="btn-red">Çıkış Yap</button>
+        </div>
+
+        <div id="market" class="panel card" style="display:none;"><h2 class="text-blue">Market</h2><div id="market-list" class="grid"></div></div>
+        <div id="inventory" class="panel card" style="display:none;"><h2 class="text-blue">Eşyalarım</h2><div id="inventory-list" class="grid"></div></div>
+        
+        <div id="leaderboard" class="panel card" style="display:none;">
+            <h2 class="text-blue">Sıralama</h2>
+            <div class="nav-menu">
+                <button onclick="rankGoster('okul')">Okul</button>
+                <button onclick="rankGoster('sinif')">Sınıf</button>
+            </div>
+            <div id="rank-list" class="user-list"></div>
+        </div>
+
+        <div id="teacher-panel" class="panel card" style="display:none;">
+            <h2 class="text-blue">👨‍🏫 Hoca Paneli</h2>
+            <select id="teacher-class-select" onchange="teacherListeGuncelle()"><option value="">Sınıf Seçin</option></select>
+            <div id="teacher-student-list" class="user-list"></div>
+        </div>
+
+        <div id="admin-panel" class="panel card" style="display:none;">
+            <h2 class="text-blue">🛡️ Admin Paneli</h2>
+            <input type="text" id="admin-search" placeholder="İsim ile ara..." onkeyup="adminListeGuncelle()">
+            <div id="admin-user-list" class="user-list"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    /* --- JAVASCRIPT KODLARI BURADA --- */
+    const firebaseConfig = { 
+        apiKey: "AIzaSyBg8MnlF8dhdKczL6P43LWvFzyVVSk4rKM", 
+        authDomain: "okuloyunu-5e5e1.firebaseapp.com", 
+        databaseURL: "https://okuloyunu-5e5e1-default-rtdb.firebaseio.com", 
+        projectId: "okuloyunu-5e5e1", 
+        storageBucket: "okuloyunu-5e5e1.firebasestorage.app", 
+        messagingSenderId: "458949914058", 
+        appId: "1:458949914058:web:3f3d8e485a1d6ee19c3333" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let userVal = null;
+    const marketItems = [
+        { id: 's-white', ad: 'Beyaz Tişört', tip: 'ust', fiyat: 0, deger: 1, color: 'white', cClass: 'c-shirt' },
+        { id: 'p-white', ad: 'Beyaz Pantolon', tip: 'alt', fiyat: 0, deger: 1, color: '#eee', cClass: 'c-pant' },
+        { id: 's-red', ad: 'Kırmızı 3D Tişört', tip: 'ust', fiyat: 50, deger: 15, color: 'transparent', cClass: 'c-shirt kirmizi-tisort-resim' },
+        { id: 'shoe-gold', ad: 'Altın Ayakkabı', tip: 'ayak', fiyat: 500, deger: 50, color: '#fbbf24', cClass: 'c-shoe' }
+    ];
+
+    // PANEL FONKSİYONLARI
+    function tabDegistir(t) {
+        document.getElementById('login-form').style.display = t === 'login' ? 'block' : 'none';
+        document.getElementById('register-form').style.display = t === 'register' ? 'block' : 'none';
+    }
+
+    function panelAc(p) {
+        document.querySelectorAll('.panel').forEach(el => el.style.display = 'none');
+        document.getElementById(p).style.display = 'block';
+        if(p === 'market') marketYukle();
+        if(p === 'inventory') envanterYukle();
+        if(p === 'teacher-panel') siniflariYukle();
+        if(p === 'leaderboard') rankGoster('okul');
+        if(p === 'admin-panel') adminListeGuncelle();
+    }
+
+    // AUTH İŞLEMLERİ
+    function girisYap() {
+        const e = document.getElementById('l-email').value;
+        const p = document.getElementById('l-pass').value;
+        auth.signInWithEmailAndPassword(e, p).catch(err => alert("Giriş Hatası: " + err.message));
+    }
+
+    function ogrenciKaydet() {
+        const ad = document.getElementById('r-ad').value;
+        const sinif = document.getElementById('r-sinif').value.toUpperCase();
+        const e = document.getElementById('r-email').value;
+        const p = document.getElementById('r-pass').value;
+        if(!ad || !sinif) return alert("Ad ve Sınıf boş olamaz");
+        
+        auth.createUserWithEmailAndPassword(e, p).then(res => {
+            db.ref('ogrenciler/' + res.user.uid).set({
+                ad, sinif, puan: 100, rol: 'ogrenci', toplamEsyaDegeri: 2,
+                karakter: { kafa: '', ust: 's-white', alt: 'p-white', ayak: '' },
+                envanter: { 's-white': true, 'p-white': true }
+            });
+        }).catch(err => alert("Kayıt Hatası: " + err.message));
+    }
+
+    // MARKET VE SIRALAMA
+    function marketYukle() {
+        const box = document.getElementById('market-list'); box.innerHTML = '';
+        marketItems.forEach(u => {
+            if(u.fiyat === 0) return;
+            box.innerHTML += `<div class="item-card"><p>${u.ad}</p><button onclick="satinAl('${u.id}', ${u.fiyat})" class="btn-green" style="width:100%">${u.fiyat} 💰</button></div>`;
+        });
+    }
+
+    function satinAl(id, f) {
+        if(userVal.puan < f) return alert("Yetersiz puan!");
+        let env = userVal.envanter || {};
+        if(env[id]) return alert("Bu eşya zaten sende var!");
+        env[id] = true;
+        let d = 0; marketItems.forEach(i => { if(env[i.id]) d += i.deger; });
+        db.ref('ogrenciler/' + auth.currentUser.uid).update({ puan: userVal.puan - f, envanter: env, toplamEsyaDegeri: d });
+    }
+
+    function envanterYukle() {
+        const box = document.getElementById('inventory-list'); box.innerHTML = '';
+        marketItems.forEach(u => { if(userVal.envanter && userVal.envanter[u.id]) {
+            box.innerHTML += `<div class="item-card"><p>${u.ad}</p><button onclick="db.ref('ogrenciler/${auth.currentUser.uid}/karakter/${u.tip}').set('${u.id}')" class="btn-blue" style="width:100%">Giy</button></div>`;
+        }});
+    }
+
+    function rankGoster(tur) {
+        db.ref('ogrenciler').once('value', snap => {
+            let l = []; snap.forEach(c => { if(c.val().rol === 'ogrenci') l.push(c.val()); });
+            l.sort((a,b) => b.toplamEsyaDegeri - a.toplamEsyaDegeri);
+            if(tur === 'sinif') l = l.filter(o => o.sinif === userVal.sinif);
+            const cont = document.getElementById('rank-list'); cont.innerHTML = '';
+            l.forEach((o, i) => cont.innerHTML += `<div class="list-item"><span>#${i+1} ${o.ad}</span> <b>${o.toplamEsyaDegeri} 💎</b></div>`);
+        });
+    }
+
+    // YÖNETİCİ FONKSİYONLARI
+    function siniflariYukle() {
+        const select = document.getElementById('teacher-class-select');
+        select.innerHTML = '<option value="">Sınıf Seçin</option>';
+        db.ref('ogrenciler').once('value', snap => {
+            let sSet = new Set();
+            snap.forEach(c => { if(c.val().sinif && c.val().rol === 'ogrenci') sSet.add(c.val().sinif); });
+            sSet.forEach(s => select.innerHTML += `<option value="${s}">${s}</option>`);
+        });
+    }
+
+    function teacherListeGuncelle() {
+        const s = document.getElementById('teacher-class-select').value;
+        const list = document.getElementById('teacher-student-list'); list.innerHTML = '';
+        db.ref('ogrenciler').orderByChild('sinif').equalTo(s).once('value', snap => {
+            snap.forEach(child => {
+                const u = child.val(); if(u.rol !== 'ogrenci') return;
+                list.innerHTML += `<div class="list-item"><span>${u.ad} (💰${u.puan})</span>
+                    <button onclick="db.ref('ogrenciler/${child.key}/puan').transaction(c => (c||0)+10)" class="btn-green btn-small">+10 Puan</button></div>`;
+            });
+        });
+    }
+
+    function adminListeGuncelle() {
+        const f = document.getElementById('admin-search').value.toLowerCase();
+        const list = document.getElementById('admin-user-list'); list.innerHTML = '';
+        db.ref('ogrenciler').once('value', snap => {
+            snap.forEach(child => {
+                const u = child.val(); if(!u.ad.toLowerCase().includes(f)) return;
+                list.innerHTML += `<div class="list-item"><span>${u.ad} [${u.rol}]</span>
+                    <button onclick="db.ref('ogrenciler/${child.key}/rol').set('ogretmen')" class="btn-blue btn-small">Hoca Yap</button></div>`;
+            });
+        });
+    }
+
+    // ANA TAKİP (Giriş Çıkış Kontrolü)
+    auth.onAuthStateChanged(u => {
+        if(u) {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            db.ref('ogrenciler/' + u.uid).on('value', snap => {
+                userVal = snap.val();
+                if(userVal) {
+                    document.getElementById('status-bar').innerHTML = `💰 ${userVal.puan} | 💎 ${userVal.toplamEsyaDegeri}`;
+                    applyLayer('view-shirt', userVal.karakter.ust);
+                    applyLayer('view-pant', userVal.karakter.alt);
+                    applyLayer('view-hat', userVal.karakter.kafa);
+                    const shoe = marketItems.find(i => i.id === userVal.karakter.ayak);
+                    document.getElementById('view-shoe-l').style.backgroundColor = shoe ? shoe.color : 'transparent';
+                    document.getElementById('view-shoe-r').style.backgroundColor = shoe ? shoe.color : 'transparent';
+                    
+                    const nav = document.getElementById('dynamic-nav');
+                    if((userVal.rol === 'admin' || userVal.rol === 'ogretmen') && !document.getElementById('tch-btn')) 
+                        nav.innerHTML += `<button id="tch-btn" onclick="panelAc('teacher-panel')">👨‍🏫 Hoca</button>`;
+                    if(userVal.rol === 'admin' && !document.getElementById('adm-btn')) 
+                        nav.innerHTML += `<button id="adm-btn" onclick="panelAc('admin-panel')">🛡️ Admin</button>`;
+                }
+            });
+        } else {
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('main-app').style.display = 'none';
+        }
+    });
+
+    function applyLayer(id, itemId) {
+        const item = marketItems.find(i => i.id === itemId);
+        const el = document.getElementById(id);
+        const kollar = document.querySelectorAll('.arm');
+        if (id === 'view-shirt') {
+            if (itemId === 's-red') kollar.forEach(k => k.classList.add('gizli-kol'));
+            else kollar.forEach(k => k.classList.remove('gizli-kol'));
+        }
+        if(item) {
+            el.className = 'layer ' + item.cClass;
+            el.style.backgroundColor = item.cClass.includes('pattern') ? '' : item.color;
+        } else { el.className = 'layer'; el.style.backgroundColor = 'transparent'; }
+    }
+</script>
+</body>
+</html>
